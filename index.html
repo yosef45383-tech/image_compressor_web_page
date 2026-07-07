@@ -3,112 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ضاغط الصور المجاني</title>
+    <title>ضاغط الصور المجاني | Free Image Compressor</title>
+    <meta name="description" content="ضاغط صور مجاني اونلاين. قلل حجم صورك JPG و PNG بسهولة وسرعة بدون برامج. Free online image compressor">
+    <meta name="keywords" content="ضغط الصور, تقليل حجم الصورة, ضاغط صور, image compressor, compress jpg png, online free">
+    <meta name="robots" content="index, follow">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-            text-align: center;
-        }
-       .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #1a1a1a;
-            margin-bottom: 8px;
-            font-size: 28px;
-        }
-        p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 16px;
-        }
-        #fileInput {
-            display: none;
-        }
-       .upload-btn {
-            background: #007bff;
-            color: white;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-       .upload-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-       .preview {
-            margin: 20px 0;
-            display: none;
-        }
-       .preview img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-       .info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-        }
-       .success {
-            color: #28a745;
-            font-weight: bold;
-            margin: 15px 0;
-            display: none;
-        }
-        #quality {
-            width: 100%;
-            margin: 15px 0;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif; background: #f5f5f5; padding: 20px; text-align: center; transition: all 0.3s; }
+      .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+        h1 { color: #1a1a1a; margin-bottom: 8px; font-size: 28px; }
+        p { color: #666; margin-bottom: 25px; font-size: 16px; }
+        #fileInput { display: none; }
+      .upload-btn { background: #007bff; color: white; padding: 14px 28px; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; margin-bottom: 20px; }
+      .upload-btn:disabled { background: #ccc; cursor: not-allowed; }
+      .preview { margin: 20px 0; display: none; }
+      .preview img { max-width: 100%; border-radius: 8px; margin-bottom: 15px; }
+      .info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
+      .success { color: #28a745; font-weight: bold; margin: 15px 0; display: none; }
+        #quality { width: 100%; margin: 15px 0; }
+        label { display: block; margin-bottom: 10px; font-weight: bold; }
+      .lang-btn { position: absolute; top: 15px; left: 15px; background: #e9ecef; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        html[dir="ltr"].lang-btn { left: auto; right: 15px; }
     </style>
-    <!-- مكتبة ضغط الصور مضمنة مباشرة عشان ما نحتاج نت -->
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>ضاغط الصور المجاني</h1>
-        <p>قلل حجم صورك بسهولة قبل ما ترسلها</p>
-
+        <button class="lang-btn" id="langBtn">EN</button>
+        <h1 data-i18n="title">ضاغط الصور المجاني</h1>
+        <p data-i18n="subtitle">قلل حجم صورك بسهولة قبل ما ترسلها</p>
         <input type="file" id="fileInput" accept="image/*">
-        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-            اختر صورة
-        </button>
-
-        <label for="quality">جودة الضغط: <span id="qualityValue">0.8</span></label>
+        <button class="upload-btn" id="uploadBtn" data-i18n="choose">اختر صورة</button>
+        <label for="quality"><span data-i18n="quality">جودة الضغط</span>: <span id="qualityValue">0.8</span></label>
         <input type="range" id="quality" min="0.1" max="1" step="0.1" value="0.8">
-
         <div class="preview" id="preview">
-            <img id="previewImg" alt="معاينة">
+            <img id="previewImg" alt="preview">
             <div class="info">
-                <div>الحجم الأصلي: <span id="originalSize">0</span> KB</div>
-                <div>الحجم بعد الضغط: <span id="compressedSize">0</span> KB</div>
-                <div>نسبة التوفير: <span id="saved">0</span>%</div>
+                <div><span data-i18n="original">الحجم الأصلي</span>: <span id="originalSize">0</span> KB</div>
+                <div><span data-i18n="compressed">الحجم بعد الضغط</span>: <span id="compressedSize">0</span> KB</div>
+                <div><span data-i18n="saved">نسبة التوفير</span>: <span id="saved">0</span>%</div>
             </div>
-        </div>
-
-        <div class="success" id="success">✅ تم الضغط والتحميل بنجاح</div>
+        <div class="success" id="success" data-i18n="done">✅ تم الضغط والتحميل بنجاح</div>
     </div>
 
     <script>
+        // مكتبة الضغط مدمجة - تشتغل بدون نت وبدون VPN
+      !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e=e||self).imageCompression=t()}(this,function(){"use strict";const e={maxSizeMB:void 0,maxWidthOrHeight:void 0,useWebWorker:!1,maxIteration:10,exifOrientation:1,fileType:void 0,initialQuality:.8,alwaysKeepResolution:!1,onProgress:void 0};function t(e){return new Promise((t,n)=>{const o=new FileReader;o.onload=()=>t(o.result),o.onerror=()=>n(o.error),o.readAsDataURL(e)})}function n(e){return new Promise((t,n)=>{const o=new Image;o.onload=()=>t(o),o.onerror=n,o.src=e})}async function o(e,t){const n=document.createElement("canvas");n.width=e.naturalWidth,n.height=e.naturalHeight;const o=n.getContext("2d");return o.drawImage(e,0,0),await new Promise(e=>{n.toBlob(e,t.fileType||"image/jpeg",t.initialQuality)})}async function r(e,n){const r=await t(e),i=await n(r);if(!i)throw new Error("failed to compress image");const s=Math.abs(i.size-e.size);return s/e.size<.01?e:i}async function i(e,t={}){const n={...e,...t};if(!(n instanceof Blob))throw new Error("The file given is not an instance of Blob");if(!/^image/.test(n.type))throw new Error("The file given is not an image");const i=await r(n,async e=>{const t=await n(e),r=await o(t,n);return r});return new File([i],n.name,{type:i.type,lastModified:Date.now()})}return i.getDataUrlFromFile=t,i.loadImage=n,i.drawImageToCanvas=o,i.compress=i,i.default=i,Object.defineProperty(i,"__esModule",{value:!0}),i});
+    </script>
+
+    <script>
+        // 1. الترجمات
+        const translations = {
+            ar: {
+                title: "ضاغط الصور المجاني",
+                subtitle: "قلل حجم صورك بسهولة قبل ما ترسلها",
+                choose: "اختر صورة",
+                quality: "جودة الضغط",
+                original: "الحجم الأصلي",
+                compressed: "الحجم بعد الضغط",
+                saved: "نسبة التوفير",
+                done: "✅ تم الضغط والتحميل بنجاح",
+                processing: "جاري الضغط...",
+                error: "صار خطأ في الضغط. جرب صورة ثانية",
+                btnLang: "EN"
+            },
+            en: {
+                title: "Free Image Compressor",
+                subtitle: "Reduce your image size easily before sending",
+                choose: "Choose Image",
+                quality: "Compression Quality",
+                original: "Original Size",
+                compressed: "Compressed Size",
+                saved: "Saved",
+                done: "✅ Compressed and downloaded successfully",
+                processing: "Compressing...",
+                error: "Compression error. Try another image",
+                btnLang: "عربي"
+            }
+        };
+
+        // 2. تحديد اللغة
+        let currentLang = localStorage.getItem('lang') || (navigator.language.startsWith('ar')? 'ar' : 'en');
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar'? 'rtl' : 'ltr';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = translations[lang][key];
+            });
+
+            document.getElementById('langBtn').textContent = translations[lang].btnLang;
+        }
+
+        // 3. زر تغيير اللغة
+        document.getElementById('langBtn').onclick = () => {
+            setLanguage(currentLang === 'ar'? 'en' : 'ar');
+        };
+
+        // 4. كود الضغط
         const fileInput = document.getElementById('fileInput');
         const qualityInput = document.getElementById('quality');
         const qualityValue = document.getElementById('qualityValue');
@@ -118,58 +113,38 @@
         const compressedSize = document.getElementById('compressedSize');
         const saved = document.getElementById('saved');
         const success = document.getElementById('success');
-        const uploadBtn = document.querySelector('.upload-btn');
+        const uploadBtn = document.getElementById('uploadBtn');
 
-        qualityInput.oninput = () => {
-            qualityValue.textContent = qualityInput.value;
-        };
+        uploadBtn.onclick = () => fileInput.click();
+        qualityInput.oninput = () => qualityValue.textContent = qualityInput.value;
 
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
-            // عطل الزر عشان ما يضغط مرتين
             uploadBtn.disabled = true;
-            uploadBtn.textContent = 'جاري الضغط...';
+            uploadBtn.textContent = translations[currentLang].processing;
             success.style.display = 'none';
 
-            const options = {
-                maxSizeMB: 2,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true,
-                initialQuality: parseFloat(qualityInput.value)
-            };
+            const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: false, initialQuality: parseFloat(qualityInput.value) };
 
             try {
                 originalSize.textContent = (file.size / 1024).toFixed(1);
-
-                // ضغط الصورة
                 const compressedFile = await imageCompression(file, options);
-
-                // عرض المعاينة
                 preview.style.display = 'block';
                 previewImg.src = URL.createObjectURL(compressedFile);
                 compressedSize.textContent = (compressedFile.size / 1024).toFixed(1);
-                const savePercent = ((file.size - compressedFile.size) / file.size * 100).toFixed(1);
-                saved.textContent = savePercent;
-
-                // تحميل الصورة - الكود المصحح للجوال
+                saved.textContent = ((file.size - compressedFile.size) / file.size * 100).toFixed(1);
                 downloadFile(compressedFile, `compressed_${file.name}`);
-
                 success.style.display = 'block';
-
             } catch (error) {
-                console.log('Error:', error);
-                alert('صار خطأ في الضغط. جرب صورة ثانية');
+                alert(translations[currentLang].error);
             } finally {
-                // رجع الزر طبيعي
                 uploadBtn.disabled = false;
-                uploadBtn.textContent = 'اختر صورة';
-                fileInput.value = ''; // عشان تقدر تختار نفس الصورة مرة ثانية
+                uploadBtn.textContent = translations[currentLang].choose;
+                fileInput.value = '';
             }
         };
 
-        // دالة التحميل الجديدة اللي تشتغل على الجوال
         function downloadFile(blob, filename) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -181,6 +156,9 @@
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
         }
+
+        // شغل اللغة اول ما تفتح الصفحة
+        setLanguage(currentLang);
     </script>
 </body>
 </html>
