@@ -1,95 +1,186 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ضاغط الصور المجاني</title>
-  <style>
-    * { box-sizing: border-box; font-family: Tahoma, sans-serif; }
-    body {
-      background: #0f172a; color: white; display: flex;
-      justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px;
-    }
-   .card {
-      background: #1e293b; padding: 30px; border-radius: 16px;
-      max-width: 500px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    h1 { margin: 0 0 10px 0; color: #38bdf8; }
-    p { color: #94a3b8; margin-bottom: 25px; }
-    input[type="file"] { display: none; }
-   .upload-btn {
-      background: #38bdf8; color: #0f172a; padding: 12px 24px;
-      border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-block;
-    }
-   .upload-btn:hover { background: #0ea5e9; }
-   .stats { margin-top: 25px; font-size: 18px; }
-   .stats span { color: #4ade80; font-weight: bold; }
-    #result { margin-top: 20px; }
-    #download {
-      background: #4ade80; color: #0f172a; padding: 10px 20px;
-      border-radius: 8px; text-decoration: none; display: none; margin-top: 15px; font-weight: bold;
-    }
-   .loader { display: none; margin: 20px auto; border: 4px solid #334155; border-top: 4px solid #38bdf8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ضاغط الصور المجاني</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+        }
+       .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        #fileInput {
+            display: none;
+        }
+       .upload-btn {
+            background: #007bff;
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+       .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+       .preview {
+            margin: 20px 0;
+            display: none;
+        }
+       .preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+       .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+       .success {
+            color: #28a745;
+            font-weight: bold;
+            margin: 15px 0;
+            display: none;
+        }
+        #quality {
+            width: 100%;
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+    <!-- مكتبة ضغط الصور مضمنة مباشرة عشان ما نحتاج نت -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 </head>
 <body>
-  <div class="card">
-    <h1>ضاغط الصور المجاني 🚀</h1>
-    <p>ارفع أي صورة وبنضغطها 60% بدون ما تفقد الجودة</p>
+    <div class="container">
+        <h1>ضاغط الصور المجاني</h1>
+        <p>قلل حجم صورك بسهولة قبل ما ترسلها</p>
 
-    <label for="fileInput" class="upload-btn">اختر صورة</label>
-    <input type="file" id="fileInput" accept="image/*">
+        <input type="file" id="fileInput" accept="image/*">
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            اختر صورة
+        </button>
 
-    <div class="loader" id="loader"></div>
+        <label for="quality">جودة الضغط: <span id="qualityValue">0.8</span></label>
+        <input type="range" id="quality" min="0.1" max="1" step="0.1" value="0.8">
 
-    <div class="stats" id="stats"></div>
-    <div id="result"></div>
-    <a id="download" download="compressed.webp">تحميل الصورة المضغوطة</a>
-  </div>
+        <div class="preview" id="preview">
+            <img id="previewImg" alt="معاينة">
+            <div class="info">
+                <div>الحجم الأصلي: <span id="originalSize">0</span> KB</div>
+                <div>الحجم بعد الضغط: <span id="compressedSize">0</span> KB</div>
+                <div>نسبة التوفير: <span id="saved">0</span>%</div>
+            </div>
+        </div>
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const stats = document.getElementById('stats');
-    const loader = document.getElementById('loader');
-    const downloadBtn = document.getElementById('download');
+        <div class="success" id="success">✅ تم الضغط والتحميل بنجاح</div>
+    </div>
 
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const qualityInput = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const preview = document.getElementById('preview');
+        const previewImg = document.getElementById('previewImg');
+        const originalSize = document.getElementById('originalSize');
+        const compressedSize = document.getElementById('compressedSize');
+        const saved = document.getElementById('saved');
+        const success = document.getElementById('success');
+        const uploadBtn = document.querySelector('.upload-btn');
 
-      const beforeSize = (file.size / 1024).toFixed(1);
-      stats.innerHTML = `الحجم قبل: <span>${beforeSize} KB</span>`;
-      loader.style.display = 'block';
-      downloadBtn.style.display = 'none';
+        qualityInput.oninput = () => {
+            qualityValue.textContent = qualityInput.value;
+        };
 
-      const formData = new FormData();
-      formData.append('image', file);
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-      try {
-        const res = await fetch('https://image-api-production-553d.up.railway.app/compress', {
-          method: 'POST',
-          body: formData
-        });
+            // عطل الزر عشان ما يضغط مرتين
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'جاري الضغط...';
+            success.style.display = 'none';
 
-        if (!res.ok) throw new Error('فشل الضغط');
+            const options = {
+                maxSizeMB: 2,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                initialQuality: parseFloat(qualityInput.value)
+            };
 
-        const blob = await res.blob();
-        const afterSize = (blob.size / 1024).toFixed(1);
-        const saved = (100 - (blob.size * 100 / file.size)).toFixed(0);
+            try {
+                originalSize.textContent = (file.size / 1024).toFixed(1);
 
-        stats.innerHTML += `<br>الحجم بعد: <span>${afterSize} KB</span><br>وفرت: <span>${saved}%</span>`;
+                // ضغط الصورة
+                const compressedFile = await imageCompression(file, options);
 
-        const url = URL.createObjectURL(blob);
-        downloadBtn.href = url;
-        downloadBtn.style.display = 'inline-block';
+                // عرض المعاينة
+                preview.style.display = 'block';
+                previewImg.src = URL.createObjectURL(compressedFile);
+                compressedSize.textContent = (compressedFile.size / 1024).toFixed(1);
+                const savePercent = ((file.size - compressedFile.size) / file.size * 100).toFixed(1);
+                saved.textContent = savePercent;
 
-      } catch (err) {
-        stats.innerHTML = `<span style="color:#f87171">صار خطأ: تأكد من الاتصال</span>`;
-      } finally {
-        loader.style.display = 'none';
-      }
-    });
-  </script>
+                // تحميل الصورة - الكود المصحح للجوال
+                downloadFile(compressedFile, `compressed_${file.name}`);
+
+                success.style.display = 'block';
+
+            } catch (error) {
+                console.log('Error:', error);
+                alert('صار خطأ في الضغط. جرب صورة ثانية');
+            } finally {
+                // رجع الزر طبيعي
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'اختر صورة';
+                fileInput.value = ''; // عشان تقدر تختار نفس الصورة مرة ثانية
+            }
+        };
+
+        // دالة التحميل الجديدة اللي تشتغل على الجوال
+        function downloadFile(blob, filename) {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
 </body>
 </html>
